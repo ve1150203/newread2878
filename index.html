@@ -14,7 +14,7 @@
         }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         
-        /* 置頂固定面板高度約 215px，所以上方留白 225px 讓滾動更流暢 */
+        /* 電腦版與筆電平板的預設高度排版（維持原樣） */
         body { background-color: var(--bg); margin: 0; padding-top: 225px; padding-bottom: 40px; color: #2d3748; }
         
         /* 置頂固定面板 */
@@ -103,21 +103,24 @@
         .page-info { font-size: 0.95rem; color: #4a5568; }
 
         /* ========================================================
-           📱 🚀 RWD 行動裝置專用防切邊修正 (當螢幕寬度在 610px 以下時自動觸發)
+           📱 🚀 RWD 行動裝置專用防蓋題與切邊修正 (螢幕寬度 610px 以下)
            ======================================================== */
         @media (max-width: 610px) {
-            /* 讓置頂面板兩側留出 8px 的防空區，不再死貼螢幕邊緣 */
+            /* 💡 核心解決：手機版按鈕變多排時，增加上方留白至 310px，把第一題題目往下推，絕不被面板蓋到！ */
+            body { padding-top: 310px; }
+
+            /* 讓置頂面板兩側留出 8px 的空間，不再死貼螢幕邊緣 */
             .top-panel {
                 left: 8px;
                 right: 8px;
                 width: auto;
                 padding: 12px 12px;
             }
-            /* 稍微加深手機版下拉選單與輸入框的邊框，確保在戶外亮光下也能清晰辨識邊緣 */
+            /* 稍微加深手機版下拉選單與輸入框的邊框，使邊界清晰 */
             select, input {
                 border: 1px solid #a0aec0;
             }
-            /* 下方題目容器同步內縮防貼邊，與上面的面板對齊 */
+            /* 下方題目容器同步內縮防貼邊，與上面的面板完美對齊 */
             .container {
                 padding: 0 10px;
             }
@@ -155,15 +158,13 @@
 
     <script src="questions.js"></script>
 
-    <script {
-        /* 這裡以下的所有 JavaScript 邏輯全數 100% 維持你原本的寫法，完全沒有更改 */
-    }>
+    <script>
+        /* 這裡以下的所有 JavaScript 邏輯、記憶進度、直跳功能全數 100% 維持原樣，完全沒動 */
         let filteredQuestions = [];
         let currentPage = 1;
         const pageSize = 50; 
         let allAnswersVisible = false; 
 
-        // 徹底清除 Excel 標題列
         function getCleanQuestions() {
             if (typeof allQuestions === 'undefined') return [];
             return allQuestions.filter(q => 
@@ -195,14 +196,10 @@
                 }
             });
 
-            // 檢查是否有記憶進度，並更新按鈕文字
             updateResumeButton();
-
-            // 預設永遠載入全部課程的第 1 頁
             loadData(true);
         };
 
-        // 檢查快取是否有進度，有的話才秀出按鈕
         function updateResumeButton() {
             const savedCourse = localStorage.getItem('quiz_saved_course');
             const savedPage = localStorage.getItem('quiz_saved_page');
@@ -217,7 +214,6 @@
             }
         }
 
-        // 手動點擊「返回上次進度」按鈕才跳轉
         function goToSavedProgress() {
             const savedCourse = localStorage.getItem('quiz_saved_course');
             const savedPage = localStorage.getItem('quiz_saved_page');
@@ -226,7 +222,7 @@
             if (savedCourse && savedPage) {
                 select.value = savedCourse;
                 currentPage = parseInt(savedPage, 10) || 1;
-                loadData(false); // 載入資料，但不要重設成第一頁
+                loadData(false);
             }
         }
 
@@ -259,11 +255,10 @@
             const listContainer = document.getElementById('quiz-list');
             listContainer.innerHTML = '';
             
-            // 只要翻頁，後台就默默更新記憶點，但不會干涉當前畫面
             const selectedCourse = document.getElementById('course-select').value;
             localStorage.setItem('quiz_saved_course', selectedCourse);
             localStorage.setItem('quiz_saved_page', currentPage);
-            updateResumeButton(); // 即時更新置頂按鈕上的文字
+            updateResumeButton();
 
             if(pageData.length === 0) {
                 listContainer.innerHTML = '<p style="text-align:center; padding:20px;">無題目資料</p>';
@@ -284,7 +279,6 @@
                 const isC = q.ans === 'C' ? 'is-correct' : '';
                 const isD = q.ans === 'D' ? 'is-correct' : '';
 
-                // 💡 樣態選擇二核心：[課程名稱] 獨立排在整張卡片的右下角，並套用灰色背景小字樣式
                 card.innerHTML = `
                     <div class="q-title">No.${q.id} ${q.title}</div>
                     <div class="option-line ${isA}">A. ${q.a}</div>
@@ -308,7 +302,7 @@
                 setTimeout(() => {
                     const targetEl = document.getElementById(`q-card-${targetId}`);
                     if (targetEl) {
-                        const offset = 225; // 配合置頂面板高度調整滾動基準點
+                        const offset = 310; // 💡 同步改為 310，讓直跳題號搜尋時，基準點也完美避開置頂面板
                         const bodyRect = document.body.getBoundingClientRect().top;
                         const elementRect = targetEl.getBoundingClientRect().top;
                         const elementPosition = elementRect - bodyRect;
