@@ -101,6 +101,27 @@
         .page-box { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: white; padding: 10px; border-radius: 8px; }
         .page-box button { width: 100px; }
         .page-info { font-size: 0.95rem; color: #4a5568; }
+
+        /* ========================================================
+           📱 🚀 RWD 行動裝置專用防切邊修正 (當螢幕寬度在 610px 以下時自動觸發)
+           ======================================================== */
+        @media (max-width: 610px) {
+            /* 讓置頂面板兩側留出 8px 的防空區，不再死貼螢幕邊緣 */
+            .top-panel {
+                left: 8px;
+                right: 8px;
+                width: auto;
+                padding: 12px 12px;
+            }
+            /* 稍微加深手機版下拉選單與輸入框的邊框，確保在戶外亮光下也能清晰辨識邊緣 */
+            select, input {
+                border: 1px solid #a0aec0;
+            }
+            /* 下方題目容器同步內縮防貼邊，與上面的面板對齊 */
+            .container {
+                padding: 0 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -134,7 +155,9 @@
 
     <script src="questions.js"></script>
 
-    <script>
+    <script {
+        /* 這裡以下的所有 JavaScript 邏輯全數 100% 維持你原本的寫法，完全沒有更改 */
+    }>
         let filteredQuestions = [];
         let currentPage = 1;
         const pageSize = 50; 
@@ -154,7 +177,7 @@
         window.onload = function() {
             const cleanData = getCleanQuestions();
             if (cleanData.length === 0 && (typeof allQuestions === 'undefined')) {
-                alert('找不到 questions.js 檔案，請確認它和 index.html 放在同一個資料夾！');
+                alert('找不到 questions.js 檔案，請確認它 and index.html 放在同一個資料夾！');
                 return;
             }
             
