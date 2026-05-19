@@ -14,8 +14,8 @@
         }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         
-        /* 增加置頂高度以容納記憶點按鈕 */
-        body { background-color: var(--bg); margin: 0; padding-top: 215px; padding-bottom: 40px; color: #2d3748; }
+        /* 置頂固定面板高度約 215px，所以上方留白 225px 讓滾動更流暢 */
+        body { background-color: var(--bg); margin: 0; padding-top: 225px; padding-bottom: 40px; color: #2d3748; }
         
         /* 置頂固定面板 */
         .top-panel {
@@ -42,14 +42,13 @@
         .search-input { flex: 2; font-weight: normal; }
         .search-btn { flex: 1; background: #3182ce; }
         
-        /* 💡 記憶點按鈕：亮眼的黃橘色 */
+        /* 記憶點按鈕 */
         .resume-btn { 
             width: 100%; 
             background: #dd6b20; 
-            display: none; /* 預設隱藏，有紀錄才會秀出來 */
+            display: none; 
             justify-content: center;
             align-items: center;
-            animation: pulse 2s infinite;
         }
         
         /* 題目列表區 */
@@ -65,6 +64,8 @@
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.5s;
         }
+        
+        /* 被直跳搜尋到的題目會閃爍黃色提醒 */
         .quiz-card.highlight-target {
             animation: highlight-flash 2s ease-in-out;
         }
@@ -73,7 +74,19 @@
             100% { background-color: white; border-left-color: #cbd5e0; }
         }
 
+        /* 題目主標題樣式 */
         .q-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 10px; line-height: 1.4; }
+        
+        /* 💡 樣態選擇二：放在最下方的課程標籤小字 */
+        .course-tag {
+            font-size: 0.82rem;
+            color: #a0aec0;
+            font-weight: normal;
+            background: #edf2f7;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
         .option-line { font-size: 0.95rem; margin: 4px 0; padding: 4px 8px; border-radius: 4px; }
         
         /* 點擊後顯示淡綠色答案的樣式 */
@@ -127,6 +140,7 @@
         const pageSize = 50; 
         let allAnswersVisible = false; 
 
+        // 徹底清除 Excel 標題列
         function getCleanQuestions() {
             if (typeof allQuestions === 'undefined') return [];
             return allQuestions.filter(q => 
@@ -158,10 +172,10 @@
                 }
             });
 
-            // 💡 檢查是否有記憶進度，並更新按鈕文字
+            // 檢查是否有記憶進度，並更新按鈕文字
             updateResumeButton();
 
-            // 預設永遠載入全部課程的第 1 頁，不自動跳轉
+            // 預設永遠載入全部課程的第 1 頁
             loadData(true);
         };
 
@@ -180,7 +194,7 @@
             }
         }
 
-        // 💡 核心功能：當使用者手動點擊「返回上次進度」按鈕才跳轉
+        // 手動點擊「返回上次進度」按鈕才跳轉
         function goToSavedProgress() {
             const savedCourse = localStorage.getItem('quiz_saved_course');
             const savedPage = localStorage.getItem('quiz_saved_page');
@@ -247,12 +261,14 @@
                 const isC = q.ans === 'C' ? 'is-correct' : '';
                 const isD = q.ans === 'D' ? 'is-correct' : '';
 
+                // 💡 樣態選擇二核心：[課程名稱] 獨立排在整張卡片的右下角，並套用灰色背景小字樣式
                 card.innerHTML = `
-                    <div class="q-title">No.${q.id} [${q.course}] ${q.title}</div>
+                    <div class="q-title">No.${q.id} ${q.title}</div>
                     <div class="option-line ${isA}">A. ${q.a}</div>
                     <div class="option-line ${isB}">B. ${q.b}</div>
                     <div class="option-line ${isC}">C. ${q.c}</div>
                     <div class="option-line ${isD}">D. ${q.d}</div>
+                    <div style="text-align: right; margin-top: 10px;"><span class="course-tag">📌 ${q.course}</span></div>
                 `;
                 listContainer.appendChild(card);
             });
@@ -269,7 +285,7 @@
                 setTimeout(() => {
                     const targetEl = document.getElementById(`q-card-${targetId}`);
                     if (targetEl) {
-                        const offset = 225; // 配合新面板高度調整滾動基準點
+                        const offset = 225; // 配合置頂面板高度調整滾動基準點
                         const bodyRect = document.body.getBoundingClientRect().top;
                         const elementRect = targetEl.getBoundingClientRect().top;
                         const elementPosition = elementRect - bodyRect;
