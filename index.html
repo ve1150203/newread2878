@@ -14,7 +14,7 @@
         }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         
-        /* 電腦版與筆電平板的預設高度排版（維持原樣） */
+        /* 電腦版與筆電平板的預設高度排版 */
         body { background-color: var(--bg); margin: 0; padding-top: 225px; padding-bottom: 40px; color: #2d3748; }
         
         /* 置頂固定面板 */
@@ -106,7 +106,7 @@
            📱 🚀 RWD 行動裝置專用防蓋題與切邊修正 (螢幕寬度 610px 以下)
            ======================================================== */
         @media (max-width: 610px) {
-            /* 💡 核心解決：手機版按鈕變多排時，增加上方留白至 310px，把第一題題目往下推，絕不被面板蓋到！ */
+            /* 手機版按鈕變多排時，增加上方留白至 310px，把第一題題目往下推 */
             body { padding-top: 310px; }
 
             /* 讓置頂面板兩側留出 8px 的空間，不再死貼螢幕邊緣 */
@@ -116,10 +116,20 @@
                 width: auto;
                 padding: 12px 12px;
             }
-            /* 稍微加深手機版下拉選單與輸入框的邊框，使邊界清晰 */
-            select, input {
+            
+            /* 💡 核心優化：加深手機邊框，並在 select 右邊強制留下 32px 的安全隔離區，防止文字推擠箭頭，太長自動變 ... */
+            select {
+                border: 1px solid #a0aec0;
+                padding-right: 32px !important;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            
+            input {
                 border: 1px solid #a0aec0;
             }
+            
             /* 下方題目容器同步內縮防貼邊，與上面的面板完美對齊 */
             .container {
                 padding: 0 10px;
@@ -159,7 +169,7 @@
     <script src="questions.js"></script>
 
     <script>
-        /* 這裡以下的所有 JavaScript 邏輯、記憶進度、直跳功能全數 100% 維持原樣，完全沒動 */
+        /* 這裡以下的所有 JavaScript 邏輯全數 100% 維持原樣 */
         let filteredQuestions = [];
         let currentPage = 1;
         const pageSize = 50; 
@@ -302,7 +312,7 @@
                 setTimeout(() => {
                     const targetEl = document.getElementById(`q-card-${targetId}`);
                     if (targetEl) {
-                        const offset = 310; // 💡 同步改為 310，讓直跳題號搜尋時，基準點也完美避開置頂面板
+                        const offset = 310; 
                         const bodyRect = document.body.getBoundingClientRect().top;
                         const elementRect = targetEl.getBoundingClientRect().top;
                         const elementPosition = elementRect - bodyRect;
