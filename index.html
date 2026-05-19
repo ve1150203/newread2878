@@ -5,136 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>行動線上題庫</title>
     <style>
-        :root {
-            --primary: #2b6cb0;
-            --success-bg: #e6fffa;
-            --success-border: #319795;
-            --success-text: #234e52;
-            --bg: #f7fafc;
-        }
+        :root { --primary: #2b6cb0; --success-bg: #e6fffa; --success-border: #319795; --success-text: #234e52; --bg: #f7fafc; }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        html, body { height: 100%; margin: 0; }
+        body { display: flex; flex-direction: column; background-color: var(--bg); color: #2d3748; }
         
-        /* 電腦版與筆電平板的預設高度排版 */
-        body { background-color: var(--bg); margin: 0; padding-top: 225px; padding-bottom: 40px; color: #2d3748; }
+        .top-panel { background: white; padding: 12px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; width: 100%; max-width: 600px; margin: 0 auto; flex-shrink: 0; }
+        .container { flex: 1; overflow-y: auto; max-width: 600px; margin: 0 auto; padding: 10px 5px; width: 100%; }
         
-        /* 置頂固定面板 */
-        .top-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 12px 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-            max-width: 600px;
-            margin: 0 auto;
-        }
         .top-panel h2 { margin: 0 0 8px 0; font-size: 1.2rem; color: var(--primary); text-align: center; }
         .row { display: flex; gap: 8px; margin-bottom: 6px; }
         select, button, input { padding: 10px; border-radius: 6px; border: 1px solid #cbd5e0; font-size: 0.95rem; font-weight: bold; }
-        select { background: white; flex: 1; }
+        select { background: white; flex: 1; min-height: 42px; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; }
-        button:active { opacity: 0.8; }
-        .btn-toggle-all { background: #4a5568; width: 100%; }
-        
-        /* 搜尋與記憶按鈕樣式 */
+        .btn-secondary { background: #4a5568; flex: 1; }
+        .btn-resume { background: #dd6b20; flex: 1; display: none; }
         .search-input { flex: 2; font-weight: normal; }
         .search-btn { flex: 1; background: #3182ce; }
         
-        /* 記憶點按鈕 */
-        .resume-btn { 
-            width: 100%; 
-            background: #dd6b20; 
-            display: none; 
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* 題目列表區 */
-        .container { max-width: 600px; margin: 0 auto; padding: 0 5px; }
-        .quiz-card {
-            background: white;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            border-left: 4px solid #cbd5e0;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.5s;
-        }
-        
-        /* 被直跳搜尋到的題目會閃爍黃色提醒 */
-        .quiz-card.highlight-target {
-            animation: highlight-flash 2s ease-in-out;
-        }
-        @keyframes highlight-flash {
-            0% { background-color: #fefcbf; border-left-color: #ecc94b; }
-            100% { background-color: white; border-left-color: #cbd5e0; }
-        }
-
-        /* 題目主標題樣式 */
+        .quiz-card { background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid #cbd5e0; cursor: pointer; }
         .q-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 10px; line-height: 1.4; }
-        
-        /* 💡 樣態選擇二：放在最下方的課程標籤小字 */
-        .course-tag {
-            font-size: 0.82rem;
-            color: #a0aec0;
-            font-weight: normal;
-            background: #edf2f7;
-            padding: 3px 8px;
-            border-radius: 4px;
-        }
-
+        .course-tag { font-size: 0.82rem; color: #a0aec0; background: #edf2f7; padding: 3px 8px; border-radius: 4px; }
         .option-line { font-size: 0.95rem; margin: 4px 0; padding: 4px 8px; border-radius: 4px; }
-        
-        /* 點擊後顯示淡綠色答案的樣式 */
-        .quiz-card.show-inner-ans .is-correct {
-            background-color: var(--success-bg) !important;
-            color: var(--success-text) !important;
-            font-weight: bold;
-            border-left: 3px solid var(--success-border);
-        }
-
-        /* 分頁按鈕 */
+        .quiz-card.show-inner-ans .is-correct { background-color: var(--success-bg) !important; color: var(--success-text) !important; font-weight: bold; border-left: 3px solid var(--success-border); }
         .page-box { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: white; padding: 10px; border-radius: 8px; }
-        .page-box button { width: 100px; }
-        .page-info { font-size: 0.95rem; color: #4a5568; }
-
-        /* ========================================================
-           📱 🚀 RWD 行動裝置專用防蓋題與切邊修正 (螢幕寬度 610px 以下)
-           ======================================================== */
-        @media (max-width: 610px) {
-            /* 手機版按鈕變多排時，增加上方留白至 310px，把第一題題目往下推 */
-            body { padding-top: 310px; }
-
-            /* 讓置頂面板兩側留出 8px 的空間，不再死貼螢幕邊緣 */
-            .top-panel {
-                left: 8px;
-                right: 8px;
-                width: auto;
-                padding: 12px 12px;
-            }
-            
-            /* 💡 核心優化：加深手機邊框，並在 select 右邊強制留下 32px 的安全隔離區，防止文字推擠箭頭，太長自動變 ... */
-            select {
-                border: 1px solid #a0aec0;
-                padding-right: 32px !important;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-            }
-            
-            input {
-                border: 1px solid #a0aec0;
-            }
-            
-            /* 下方題目容器同步內縮防貼邊，與上面的面板完美對齊 */
-            .container {
-                padding: 0 10px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -142,230 +36,120 @@
     <div class="top-panel">
         <h2>📱 行動線上題庫</h2>
         <div class="row">
-            <select id="course-select" onchange="resetAndLoad()"><option value="all">全部課程 (載入中...)</option></select>
+            <select id="course-select" onchange="loadData(true)"></select>
         </div>
         <div class="row">
-            <input type="number" id="search-id-input" class="search-input" placeholder="輸入 Excel 題號 (例: 520)">
+            <input type="number" id="search-id-input" class="search-input" placeholder="輸入題號">
             <button class="search-btn" onclick="jumpToQuestionId()">直跳該題</button>
         </div>
         <div class="row">
-            <button id="resume-btn" class="resume-btn" onclick="goToSavedProgress()">↩️ 點此返回上次進度</button>
-        </div>
-        <div class="row">
-            <button class="btn-toggle-all" onclick="toggleAllAnswers()">👁️ 隱/顯全部答案</button>
+            <button id="resume-btn" class="btn-resume" onclick="goToSavedProgress()">↩️ 續讀上次</button>
+            <button class="btn-secondary" onclick="toggleAllAnswers()">👁️ 顯示全部答案</button>
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="scroll-container">
         <div id="quiz-list"></div>
-        
         <div class="page-box">
             <button id="prev-btn" onclick="changePage(-1)">上一頁</button>
-            <div class="page-info" id="page-info">第 1 頁</div>
+            <div id="page-info">第 1 頁</div>
             <button id="next-btn" onclick="changePage(1)">下一頁</button>
         </div>
     </div>
 
     <script src="questions.js"></script>
-
     <script>
-        /* 這裡以下的所有 JavaScript 邏輯全數 100% 維持原樣 */
         let filteredQuestions = [];
         let currentPage = 1;
+        let allAnswersVisible = false;
         const pageSize = 50; 
-        let allAnswersVisible = false; 
 
         function getCleanQuestions() {
             if (typeof allQuestions === 'undefined') return [];
-            return allQuestions.filter(q => 
-                q.id !== "題號" && 
-                q.course !== "課程名稱" && 
-                q.title !== "題目" && 
-                q.title && q.id
-            );
+            return allQuestions.filter(q => q.id !== "序號" && q.id !== "題號" && q.id && q.id !== "id");
         }
 
         window.onload = function() {
             const cleanData = getCleanQuestions();
-            if (cleanData.length === 0 && (typeof allQuestions === 'undefined')) {
-                alert('找不到 questions.js 檔案，請確認它 and index.html 放在同一個資料夾！');
-                return;
-            }
-            
-            const courses = [...new Set(cleanData.map(q => q.course))];
             const select = document.getElementById('course-select');
-            select.innerHTML = `<option value="all">全部課程 (${cleanData.length}題)</option>`;
-            
-            courses.forEach(c => {
-                if(c) {
-                    const count = cleanData.filter(q => q.course === c).length;
-                    const opt = document.createElement('option'); 
-                    opt.value = c; 
-                    opt.textContent = `${c} (${count}題)`; 
-                    select.appendChild(opt); 
-                }
-            });
+            const counts = cleanData.reduce((acc, q) => { acc[q.course] = (acc[q.course] || 0) + 1; return acc; }, {});
 
+            let html = `<option value="all">全部課程 (${cleanData.length} 題)</option>`;
+            for (let c in counts) html += `<option value="${c}">${c} (共 ${counts[c]} 題)</option>`;
+            select.innerHTML = html;
+            
             updateResumeButton();
             loadData(true);
         };
 
         function updateResumeButton() {
-            const savedCourse = localStorage.getItem('quiz_saved_course');
-            const savedPage = localStorage.getItem('quiz_saved_page');
-            const resumeBtn = document.getElementById('resume-btn');
+            const btn = document.getElementById('resume-btn');
+            const saved = localStorage.getItem('quiz_saved_course');
+            btn.style.display = saved ? 'block' : 'none';
+        }
 
-            if (savedCourse && savedPage) {
-                const courseText = savedCourse === 'all' ? '全部課程' : savedCourse;
-                resumeBtn.textContent = `↩️ 續讀上次：${courseText} (第 ${savedPage} 頁)`;
-                resumeBtn.style.display = 'flex';
-            } else {
-                resumeBtn.style.display = 'none';
+        function loadData(reset) {
+            const data = getCleanQuestions();
+            const course = document.getElementById('course-select').value;
+            filteredQuestions = (course === 'all') ? data : data.filter(q => q.course === course);
+            if(reset) {
+                currentPage = 1;
+                localStorage.setItem('quiz_saved_course', course);
+                localStorage.setItem('quiz_saved_page', 1);
             }
+            allAnswersVisible = false;
+            renderPage();
+            updateResumeButton();
         }
 
         function goToSavedProgress() {
             const savedCourse = localStorage.getItem('quiz_saved_course');
             const savedPage = localStorage.getItem('quiz_saved_page');
-            const select = document.getElementById('course-select');
-
-            if (savedCourse && savedPage) {
-                select.value = savedCourse;
-                currentPage = parseInt(savedPage, 10) || 1;
+            if(savedCourse) {
+                document.getElementById('course-select').value = savedCourse;
+                currentPage = parseInt(savedPage) || 1;
                 loadData(false);
             }
         }
 
-        function resetAndLoad() {
-            loadData(true);
-        }
-
-        function loadData(shouldResetPage = true) {
-            const selectedCourse = document.getElementById('course-select').value;
-            const cleanData = getCleanQuestions();
-            
-            if (selectedCourse === 'all') {
-                filteredQuestions = cleanData;
-            } else {
-                filteredQuestions = cleanData.filter(q => q.course === selectedCourse);
-            }
-            
-            if (shouldResetPage) {
-                currentPage = 1;
-            }
-            allAnswersVisible = false; 
-            renderPage();
-        }
-
-        function renderPage(targetId = null) {
-            const start = (currentPage - 1) * pageSize;
-            const end = start + pageSize;
-            const pageData = filteredQuestions.slice(start, end);
-            
-            const listContainer = document.getElementById('quiz-list');
-            listContainer.innerHTML = '';
-            
-            const selectedCourse = document.getElementById('course-select').value;
-            localStorage.setItem('quiz_saved_course', selectedCourse);
-            localStorage.setItem('quiz_saved_page', currentPage);
-            updateResumeButton();
-
-            if(pageData.length === 0) {
-                listContainer.innerHTML = '<p style="text-align:center; padding:20px;">無題目資料</p>';
-                return;
-            }
-
-            pageData.forEach((q) => {
-                const card = document.createElement('div');
-                card.id = `q-card-${q.id}`; 
-                card.className = `quiz-card ${allAnswersVisible ? 'show-inner-ans' : ''}`;
-                
-                card.onclick = function() {
-                    this.classList.toggle('show-inner-ans');
-                };
-
-                const isA = q.ans === 'A' ? 'is-correct' : '';
-                const isB = q.ans === 'B' ? 'is-correct' : '';
-                const isC = q.ans === 'C' ? 'is-correct' : '';
-                const isD = q.ans === 'D' ? 'is-correct' : '';
-
-                card.innerHTML = `
-                    <div class="q-title">No.${q.id} ${q.title}</div>
-                    <div class="option-line ${isA}">A. ${q.a}</div>
-                    <div class="option-line ${isB}">B. ${q.b}</div>
-                    <div class="option-line ${isC}">C. ${q.c}</div>
-                    <div class="option-line ${isD}">D. ${q.d}</div>
-                    <div style="text-align: right; margin-top: 10px;"><span class="course-tag">📌 ${q.course}</span></div>
-                `;
-                listContainer.appendChild(card);
-            });
-
-            const totalPages = Math.ceil(filteredQuestions.length / pageSize) || 1;
-            document.getElementById('page-info').textContent = `第 ${currentPage} / ${totalPages} 頁 (共 ${filteredQuestions.length} 題)`;
-            document.getElementById('prev-btn').disabled = currentPage === 1;
-            document.getElementById('next-btn').disabled = currentPage === totalPages;
-            
-            document.getElementById('prev-btn').style.background = currentPage === 1 ? '#cbd5e0' : '#2b6cb0';
-            document.getElementById('next-btn').style.background = currentPage === totalPages ? '#cbd5e0' : '#2b6cb0';
-
-            if (targetId) {
-                setTimeout(() => {
-                    const targetEl = document.getElementById(`q-card-${targetId}`);
-                    if (targetEl) {
-                        const offset = 310; 
-                        const bodyRect = document.body.getBoundingClientRect().top;
-                        const elementRect = targetEl.getBoundingClientRect().top;
-                        const elementPosition = elementRect - bodyRect;
-                        const offsetPosition = elementPosition - offset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                        
-                        targetEl.classList.add('highlight-target');
-                    }
-                }, 100);
-            } else {
-                window.scrollTo(0, 0); 
-            }
-        }
-
-        function changePage(direction) {
-            currentPage += direction;
-            renderPage();
-        }
-
         function toggleAllAnswers() {
             allAnswersVisible = !allAnswersVisible;
-            const cards = document.getElementsByClassName('quiz-card');
-            for (let card of cards) {
-                if (allAnswersVisible) {
-                    card.classList.add('show-inner-ans');
-                } else {
-                    card.classList.remove('show-inner-ans');
-                }
-            }
+            document.querySelectorAll('.quiz-card').forEach(c => 
+                allAnswersVisible ? c.classList.add('show-inner-ans') : c.classList.remove('show-inner-ans')
+            );
+        }
+
+        function renderPage() {
+            const list = document.getElementById('quiz-list');
+            const pageData = filteredQuestions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            list.innerHTML = pageData.map(q => `
+                <div class="quiz-card ${allAnswersVisible ? 'show-inner-ans' : ''}" onclick="this.classList.toggle('show-inner-ans')">
+                    <div class="q-title">No.${q.id} ${q.title}</div>
+                    <div class="option-line ${q.ans==='A'?'is-correct':''}">A. ${q.a}</div>
+                    <div class="option-line ${q.ans==='B'?'is-correct':''}">B. ${q.b}</div>
+                    <div class="option-line ${q.ans==='C'?'is-correct':''}">C. ${q.c}</div>
+                    <div class="option-line ${q.ans==='D'?'is-correct':''}">D. ${q.d}</div>
+                    <div style="text-align:right;"><span class="course-tag">📌 ${q.course}</span></div>
+                </div>
+            `).join('');
+            document.getElementById('page-info').textContent = `第 ${currentPage} / ${Math.ceil(filteredQuestions.length/pageSize) || 1} 頁`;
+            localStorage.setItem('quiz_saved_page', currentPage);
         }
 
         function jumpToQuestionId() {
-            const inputVal = document.getElementById('search-id-input').value.trim();
-            if (!inputVal) { alert('請輸入題號！'); return; }
-
-            const cleanData = getCleanQuestions();
-            const targetIndex = cleanData.findIndex(q => String(q.id) === String(inputVal));
-            
-            if (targetIndex === -1) {
-                alert(`找不到題號 [${inputVal}]！`);
-                return;
-            }
-
-            document.getElementById('course-select').value = 'all';
-            filteredQuestions = cleanData;
-            currentPage = Math.ceil((targetIndex + 1) / pageSize);
-            renderPage(inputVal);
-            document.getElementById('search-id-input').value = '';
+            const id = document.getElementById('search-id-input').value.trim();
+            const data = getCleanQuestions();
+            const idx = data.findIndex(q => String(q.id) === id);
+            if (idx === -1) { alert('找不到題號！'); return; }
+            const target = data[idx];
+            document.getElementById('course-select').value = target.course;
+            loadData(false);
+            currentPage = Math.ceil((filteredQuestions.findIndex(q => q.id === id) + 1) / pageSize);
+            renderPage();
+            document.getElementById('scroll-container').scrollTop = 0;
         }
+
+        function changePage(d) { currentPage += d; renderPage(); document.getElementById('scroll-container').scrollTop = 0; }
     </script>
 </body>
 </html>
